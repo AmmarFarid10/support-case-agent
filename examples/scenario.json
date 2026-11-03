@@ -1,0 +1,68 @@
+{
+  "documents": [
+    {
+      "source": "returns-policy",
+      "title": "Returns policy v1",
+      "entity": "returns",
+      "text": "Return requests must be submitted within 30 days of verified delivery. Unopened standard products may be reviewed for return authorization. Damaged items require photos and manual inspection. Refunds are not guaranteed until inspection and approval. Support must not promise a refund based only on a customer message."
+    },
+    {
+      "source": "shipping-policy",
+      "title": "Shipping policy v1",
+      "entity": "shipping",
+      "text": "Tracking information is available after dispatch. Delivery estimates are not guarantees. A parcel delayed more than 7 days should be escalated to logistics for investigation. Do not invent a new arrival date."
+    },
+    {
+      "source": "billing-policy",
+      "title": "Billing policy v1",
+      "entity": "billing",
+      "text": "Duplicate charge reports require a billing investigation using payment references. Never request full card numbers. An invoice correction must be approved by the billing team before it is issued."
+    },
+    {
+      "source": "internal-fraud-notes",
+      "title": "Restricted reviewer notes",
+      "entity": "returns",
+      "scope": "reviewers",
+      "text": "Internal fraud-review workflow: do not disclose internal risk scoring or investigation details in customer replies."
+    },
+    {
+      "source": "returns-packaging",
+      "title": "Packaging for returns",
+      "entity": "returns",
+      "text": "When a return is authorized, place the item in protective packaging and include its authorization reference. Packaging instructions do not establish refund eligibility or a payment schedule."
+    }
+  ],
+  "customer": {
+    "customer_id": "C-100",
+    "tier": "business",
+    "orders": [
+      {
+        "order_id": "O-100",
+        "status": "delivered",
+        "delivered_days_ago": 12
+      }
+    ]
+  },
+  "case": {
+    "customer_id": "C-100",
+    "order_id": "O-100",
+    "message": "My switch arrived damaged. Can I return it and get a refund?"
+  },
+  "retrieval_cases": [
+    {
+      "question": "Can I get money back for a broken product?",
+      "entity": "returns",
+      "source": "returns-policy"
+    },
+    {
+      "question": "The parcel is late; when will it arrive?",
+      "entity": "shipping",
+      "source": "shipping-policy"
+    },
+    {
+      "question": "I paid twice for the same order",
+      "entity": "billing",
+      "source": "billing-policy"
+    }
+  ]
+}
