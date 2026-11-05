@@ -59,7 +59,7 @@ Optional local LLM features use an existing Ollama `qwen3:4b`. Set `OLLAMA_MODEL
 5. A different same-tenant reviewer POSTs `/cases/{id}/decision` with the exact proposal hash.
 6. GET `/cases/{id}/reply` returns the approved local reply. Integrating an external delivery adapter would require separate authorization, provider idempotency and reconciliation; this project does not send messages.
 
-The run ledger is authoritative after an effect is committed, even if the final graph checkpoint is interrupted. A retry returns the same local reply, not another delivery. The policy corpus is assumed to be staff-maintained; exact quote validation confirms provenance, not whether a policy is correct or appropriate for a particular customer.
+The run ledger is authoritative after an effect is committed, even if the final graph checkpoint is interrupted. A retry returns the same local reply, not another delivery. Local-model calls retry remote protocol failures (such as a server disconnect before response headers) within the same three-attempt budget as network failures. Exhaustion records a `FAILED` case with a safe `ModelError` category; retrying the same idempotency key returns that failure without calling the model again. To explicitly start a new attempt after recovery, use a new key. The policy corpus is assumed to be staff-maintained; exact quote validation confirms provenance, not whether a policy is correct or appropriate for a particular customer.
 
 ```mermaid
 flowchart TD
