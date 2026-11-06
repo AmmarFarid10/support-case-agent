@@ -1,8 +1,31 @@
+import httpx
 import pytest
 from conftest import auth
 from test_workflow import SAMPLE, decide, seed, start
 
+from app.core.model import LocalModel
 from app.schemas import Draft, Plan
+
+
+def test_model_disconnect_exhaustion_fails_case_without_leaking_provider_text(client):
+    seed(client)
+    calls = []
+
+    def handler(request):
+        calls.append(request)
+        raise httpx.RemoteProtocolError("sensitive provider output")
+
+    client.app.state.service.model = LocalModel(
+        transport=httpx.MockTransport(handler), sleeper=lambda _: None
+    )
+    result = start(client, body={**SAMPLE["case"], "planner": "ollama"}).json()
+    assert result["status"] == "FAILED"
+    assert result["result"] == {"error": "ModelError"}
+    assert result["proposal"] is None
+    assert len(calls) == 3
+    assert start(client, body={**SAMPLE["case"], "planner": "ollama"}).json() == result
+    assert len(calls) == 3
+    assert client.get("/cases/" + result["id"] + "/reply").status_code == 404
 
 
 def test_draft_uses_verified_order_and_excludes_reviewer_notes(client):

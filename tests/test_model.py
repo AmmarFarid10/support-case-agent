@@ -42,6 +42,38 @@ def test_timeout_retries_are_bounded():
     assert len(calls) == 3
 
 
+@pytest.mark.parametrize("recover", [True, False])
+def test_remote_protocol_errors_use_bounded_retries(recover):
+    calls, delays = [], []
+
+    def handler(request):
+        calls.append(request)
+        if not recover or len(calls) < 3:
+            raise httpx.RemoteProtocolError("server disconnected before sending response")
+        return response('{"category":"shipping"}')
+
+    model = LocalModel(transport=httpx.MockTransport(handler), sleeper=delays.append)
+    if recover:
+        assert model.structured(Output, "Classify", {}).category == "shipping"
+    else:
+        with pytest.raises(ModelError, match="unavailable after three attempts"):
+            model.structured(Output, "Classify", {})
+    assert len(calls) == 3
+    assert delays == [0.15, 0.3]
+
+
+def test_local_protocol_errors_are_not_retried():
+    calls = []
+
+    def handler(request):
+        calls.append(request)
+        raise httpx.LocalProtocolError("invalid local request")
+
+    with pytest.raises(httpx.LocalProtocolError):
+        LocalModel(transport=httpx.MockTransport(handler)).structured(Output, "x", {})
+    assert len(calls) == 1
+
+
 @pytest.mark.parametrize("body", ["not json", '{"category":"returns","execute":"shell"}', "{}"])
 def test_invalid_model_json_fails_closed_without_retry(body):
     calls = []

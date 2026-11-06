@@ -54,7 +54,7 @@ class LocalModel:
                             continue
                     response.raise_for_status()
                     return schema.model_validate_json(response.json()["message"]["content"])
-                except (httpx.TimeoutException, httpx.NetworkError):
+                except (httpx.TimeoutException, httpx.NetworkError, httpx.RemoteProtocolError):
                     if attempt < 2:
                         self.sleep(0.15 * 2**attempt)
                         continue
